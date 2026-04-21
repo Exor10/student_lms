@@ -1,0 +1,48 @@
+[Users]
+user_id,full_name,email,password_hash,role,status,created_at
+usr_1001,Maria Dela Cruz,maria.teacher@edulms.edu,<hash_generated_by_apps_script>,teacher,active,2026-04-21T08:00:00Z
+usr_2001,Adrian Ramos,adrian.ramos@edulms.edu,<hash_generated_by_apps_script>,student,active,2026-04-21T08:10:00Z
+usr_2002,Sofia Lim,sofia.lim@edulms.edu,<hash_generated_by_apps_script>,student,active,2026-04-21T08:12:00Z
+
+[Teachers]
+teacher_id,user_id,department
+tch_1001,usr_1001,Science
+
+[Classes]
+class_id,teacher_id,class_name,school_year,section
+cls_1001,tch_1001,Science 8,2026-2027,A
+
+[Students]
+student_id,user_id,student_number,section,year_level
+std_1001,usr_2001,2026-0001,A,8
+std_1002,usr_2002,2026-0002,A,8
+
+[Enrollments]
+enrollment_id,class_id,student_id
+enr_1001,cls_1001,std_1001
+enr_1002,cls_1001,std_1002
+
+[Assignments]
+assignment_id,class_id,title,description,due_date,status
+asg_1001,cls_1001,Lab Safety Worksheet,Complete the worksheet about proper lab safety,2026-05-03,Open
+asg_1002,cls_1001,Photosynthesis Quiz Review,Prepare answers for review questions 1-15,2026-05-08,Open
+
+[Announcements]
+announcement_id,class_id,teacher_id,title,content,date_posted
+ann_1001,cls_1001,tch_1001,Welcome to Science 8,Please check the assignment tab every Monday and Thursday.,2026-04-22T09:00:00Z
+ann_1002,cls_1001,tch_1001,Lab Schedule,Our first lab activity is on May 2. Wear closed shoes.,2026-04-24T09:00:00Z
+
+[Grades]
+grade_id,student_id,class_id,assignment_id,score,remarks,date_recorded
+grd_1001,std_1001,cls_1001,asg_1001,92,Good analysis,2026-05-04T10:00:00Z
+grd_1002,std_1002,cls_1001,asg_1001,89,Good effort,2026-05-04T10:05:00Z
+
+[CalendarEvents]
+event_id,class_id,title,event_date,event_type
+evt_1001,cls_1001,Lab Safety Worksheet Due,2026-05-03,Assignment Due
+evt_1002,cls_1001,Science Lab Activity,2026-05-02,Class Event
+
+[Messages]
+message_id,sender_user_id,receiver_user_id,message_body,sent_at
+msg_1001,usr_2001,usr_1001,Good morning teacher, may I clarify item 3?,2026-04-25T07:30:00Z
+msg_1002,usr_1001,usr_2001,Yes, please check the note in classroom stream.,2026-04-25T08:00:00Z

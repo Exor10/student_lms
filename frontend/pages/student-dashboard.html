@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduLMS | Student Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <h1 class="brand-title">EduLMS</h1>
+        <nav class="nav-list">
+          <button class="nav-item active" data-section="overview">Overview</button>
+          <button class="nav-item" data-section="assignments">Assignments</button>
+          <button class="nav-item" data-section="announcements">Announcements</button>
+          <button class="nav-item" data-section="grades">Grades</button>
+          <button class="nav-item" data-section="calendar">Calendar</button>
+          <button class="nav-item" data-section="messages">Messages</button>
+        </nav>
+        <button id="toggle-theme" class="btn btn-secondary">Toggle Theme</button>
+      </aside>
+
+      <div class="main-content">
+        <header class="top-header">
+          <h2>Student Dashboard</h2>
+          <div>
+            <span id="student-name"></span>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+          </div>
+        </header>
+
+        <section id="overview" class="panel-section active">
+          <div class="cards-grid" id="student-summary-cards"></div>
+        </section>
+
+        <section id="assignments" class="panel-section">
+          <article class="card">
+            <h3>Upcoming Assignments</h3>
+            <ul id="student-assignment-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="announcements" class="panel-section">
+          <article class="card">
+            <h3>Announcement Feed</h3>
+            <ul id="student-announcement-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="grades" class="panel-section">
+          <article class="card">
+            <h3>Your Grades</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Assignment ID</th><th>Score</th><th>Remarks</th><th>Date</th></tr></thead>
+                <tbody id="student-grade-table"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="calendar" class="panel-section">
+          <article class="card">
+            <h3>Class Calendar</h3>
+            <ul id="student-calendar-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="messages" class="panel-section">
+          <article class="card">
+            <h3>Message Teacher</h3>
+            <form id="message-form" class="grid-form">
+              <input type="text" name="receiver_user_id" placeholder="Teacher User ID" required />
+              <textarea name="message_body" placeholder="Write your message" required></textarea>
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+            <p id="message-status" class="form-message"></p>
+          </article>
+          <article class="card">
+            <h3>Recent Messages</h3>
+            <ul id="message-list" class="stack-list"></ul>
+          </article>
+        </section>
+      </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/dashboard-common.js"></script>
+    <script src="../js/student-dashboard.js"></script>
+  </body>
+</html>

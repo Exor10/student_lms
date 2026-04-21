@@ -23,32 +23,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   async function loadDashboard() {
-    const dataRes = await EduApi.getTeacherDashboardData({ token: auth.token, teacher_id: auth.teacher_id });
-    if (!dataRes.success) throw new Error(dataRes.message);
-    const data = dataRes.data;
+    const data = await EduApi.getTeacherDashboardData({ teacher_user_id: auth.user_id });
+    if (!data.success) throw new Error(data.message || 'Unable to load dashboard data.');
 
-    ui.summaryStudents.textContent = data.students.length;
-    ui.summaryAssignments.textContent = data.assignments.length;
-    ui.summaryAnnouncements.textContent = data.announcements.length;
-    ui.summaryGrades.textContent = data.grades.length;
+    const summary = data.summary || {};
+    const students = data.students || [];
+    const assignments = data.assignments || [];
+    const announcements = data.announcements || [];
+    const grades = data.grades || [];
+    const calendar = data.calendar || [];
 
-    ui.studentsBody.innerHTML = data.students.length ? data.students.map(s => `
+    ui.summaryStudents.textContent = summary.total_students ?? summary.students ?? students.length;
+    ui.summaryAssignments.textContent = summary.total_assignments ?? summary.assignments ?? assignments.length;
+    ui.summaryAnnouncements.textContent = summary.total_announcements ?? summary.announcements ?? announcements.length;
+    ui.summaryGrades.textContent = summary.total_grades ?? summary.grades ?? grades.length;
+
+    ui.studentsBody.innerHTML = students.length ? students.map(s => `
       <tr><td>${s.student_number}</td><td>${s.full_name}</td><td>${s.section}</td><td>${s.year_level}</td></tr>`).join('')
       : `<tr><td colspan="4"><div class="empty-state">No students added yet.</div></td></tr>`;
 
-    ui.assignmentsBody.innerHTML = data.assignments.length ? data.assignments.map(a => `
+    ui.assignmentsBody.innerHTML = assignments.length ? assignments.map(a => `
       <tr><td>${a.title}</td><td>${a.description}</td><td>${a.due_date}</td><td><span class="badge">${a.status}</span></td></tr>`).join('')
       : `<tr><td colspan="4"><div class="empty-state">No assignments yet.</div></td></tr>`;
 
-    ui.announcementsList.innerHTML = data.announcements.length ? data.announcements.map(a => `
+    ui.announcementsList.innerHTML = announcements.length ? announcements.map(a => `
       <div class="card" style="margin-bottom:10px"><div class="card-head">${a.title}</div><div class="card-body">${a.content}<br><small>${a.date_posted}</small></div></div>`).join('')
       : `<div class="empty-state">No announcements posted.</div>`;
 
-    ui.gradesBody.innerHTML = data.grades.length ? data.grades.map(g => `
+    ui.gradesBody.innerHTML = grades.length ? grades.map(g => `
       <tr><td>${g.student_name}</td><td>${g.assignment_title}</td><td>${g.score}</td><td>${g.remarks}</td></tr>`).join('')
       : `<tr><td colspan="4"><div class="empty-state">No grades assigned.</div></td></tr>`;
 
-    ui.calendarList.innerHTML = data.calendar.length ? data.calendar.map(c => `<li>${c.event_date} - ${c.title} (${c.event_type})</li>`).join('')
+    ui.calendarList.innerHTML = calendar.length ? calendar.map(c => `<li>${c.event_date} - ${c.title} (${c.event_type})</li>`).join('')
       : `<div class="empty-state">No calendar events.</div>`;
   }
 
@@ -60,7 +66,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       msg.className = 'message hidden';
       try {
         const payload = transformData(form);
-        const res = await requestFn({ ...payload, token: auth.token, teacher_id: auth.teacher_id, class_id: auth.class_id });
+        if (!auth.class_id && formId !== 'addStudentForm') {
+          throw new Error('Class is not configured for your account yet. Please contact your teacher admin.');
+        }
+        const requestPayload = { ...payload, teacher_user_id: auth.user_id };
+        if (auth.class_id) requestPayload.class_id = auth.class_id;
+        const res = await requestFn(requestPayload);
         if (!res.success) throw new Error(res.message);
         msg.textContent = 'Saved successfully.';
         msg.className = 'message success';

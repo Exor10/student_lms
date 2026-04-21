@@ -63,7 +63,7 @@ Paste these headers in row 1 of each sheet:
 4. Save project.
 5. Deploy as **Web app**:
    - Execute as: **Me**
-   - Who has access: **Anyone with Google account** (or stricter depending on testing)
+   - Who has access: **Anyone** (recommended for testing from a static frontend like GitHub Pages), or **Anyone with Google account** if your testers are signed in.
 6. Copy the deployed web app URL.
 
 ## 3) Connect Frontend to Backend
@@ -77,7 +77,8 @@ API_BASE_URL: 'https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN
 
 3. If you redeploy Apps Script later, update `docs/js/config.js` with the new URL.
 
-4. Serve `docs` as static files (VS Code Live Server, Python `http.server`, or any static host).
+4. Serve `docs` as static files (VS Code Live Server, Python `http.server`, GitHub Pages, or any static host).
+5. If you get CORS/access errors while testing, redeploy the Apps Script web app and confirm the `/exec` URL and access level match your test environment.
 
 ## 4) Seed Data
 

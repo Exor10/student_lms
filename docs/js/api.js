@@ -6,16 +6,19 @@
       throw new Error('Set API_BASE_URL in docs/js/config.js');
     }
 
-    if (method === 'GET') {
-      const url = `${base}?action=${encodeURIComponent(action)}&${new URLSearchParams(payload).toString()}`;
+    const requestMethod = (method || 'POST').toUpperCase();
+
+    if (requestMethod === 'GET') {
+      const params = new URLSearchParams({ action, ...payload });
+      const url = `${base}?${params.toString()}`;
       const res = await fetch(url);
       return res.json();
     }
 
-    const body = new URLSearchParams({ action, ...payload }).toString();
+    const body = new URLSearchParams({ action, ...payload });
 
     const res = await fetch(base, {
-      method: 'POST',
+      method: requestMethod,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       },

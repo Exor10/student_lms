@@ -21,19 +21,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     gradesBody: document.getElementById('gradesBody'),
     calendarList: document.getElementById('calendarList')
   };
+  let defaultClassId = '';
 
   async function loadDashboard() {
-    const data = await EduApi.getTeacherDashboardData({ teacher_user_id: auth.user_id });
-    if (!data.success) throw new Error(data.message || 'Unable to load dashboard data.');
+    const dashboard = await EduApi.getTeacherDashboardData({ teacher_user_id: auth.user_id });
+    if (!dashboard.success) throw new Error(dashboard.message || 'Unable to load dashboard data.');
 
-    const summary = data.summary || {};
-    const students = data.students || [];
-    const assignments = data.assignments || [];
-    const announcements = data.announcements || [];
-    const grades = data.grades || [];
-    const calendar = data.calendar || [];
+    const summary = dashboard.summary || {};
+    const classes = dashboard.classes || [];
+    const students = dashboard.students || [];
+    const assignments = dashboard.assignments || [];
+    const announcements = dashboard.announcements || [];
+    const grades = dashboard.grades || [];
+    const calendar = dashboard.calendar || [];
+    defaultClassId = classes[0]?.class_id || '';
 
-    ui.summaryStudents.textContent = summary.total_students ?? summary.students ?? students.length;
+    ui.summaryStudents.textContent = summary.total_classes ?? summary.total_students ?? classes.length;
     ui.summaryAssignments.textContent = summary.total_assignments ?? summary.assignments ?? assignments.length;
     ui.summaryAnnouncements.textContent = summary.total_announcements ?? summary.announcements ?? announcements.length;
     ui.summaryGrades.textContent = summary.total_grades ?? summary.grades ?? grades.length;
@@ -54,8 +57,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       <tr><td>${g.student_name}</td><td>${g.assignment_title}</td><td>${g.score}</td><td>${g.remarks}</td></tr>`).join('')
       : `<tr><td colspan="4"><div class="empty-state">No grades assigned.</div></td></tr>`;
 
-    ui.calendarList.innerHTML = calendar.length ? calendar.map(c => `<li>${c.event_date} - ${c.title} (${c.event_type})</li>`).join('')
-      : `<div class="empty-state">No calendar events.</div>`;
+    if (calendar.length) {
+      ui.calendarList.innerHTML = calendar.map(c => `<li>${c.event_date} - ${c.title} (${c.event_type})</li>`).join('');
+    } else if (classes.length) {
+      ui.calendarList.innerHTML = `
+        <div class="empty-state">No calendar events yet. Your classes: ${classes.map(c => c.class_name || c.class_id).join(', ')}</div>
+      `;
+    } else {
+      ui.calendarList.innerHTML = `<div class="empty-state">No classes or calendar events available yet.</div>`;
+    }
   }
 
   async function submitForm(formId, requestFn, transformData = (f) => Object.fromEntries(new FormData(f))) {
@@ -66,11 +76,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       msg.className = 'message hidden';
       try {
         const payload = transformData(form);
-        if (!auth.class_id && formId !== 'addStudentForm') {
-          throw new Error('Class is not configured for your account yet. Please contact your teacher admin.');
-        }
         const requestPayload = { ...payload, teacher_user_id: auth.user_id };
-        if (auth.class_id) requestPayload.class_id = auth.class_id;
+        const classIdFromForm = payload.class_id || '';
+        const resolvedClassId = classIdFromForm || defaultClassId;
+
+        if (formId === 'assignmentForm' || formId === 'announcementForm') {
+          if (!resolvedClassId) {
+            throw new Error('No class available. Please create or assign a class before submitting.');
+          }
+          requestPayload.class_id = resolvedClassId;
+        }
+
+        if (formId === 'gradeForm') {
+          const missingFields = [];
+          if (!resolvedClassId) missingFields.push('class_id');
+          if (!payload.student_id) missingFields.push('student_id');
+          if (!payload.assignment_id) missingFields.push('assignment_id');
+          if (missingFields.length) {
+            throw new Error(`Cannot submit grade. Missing required field(s): ${missingFields.join(', ')}.`);
+          }
+          requestPayload.class_id = resolvedClassId;
+        }
+
         const res = await requestFn(requestPayload);
         if (!res.success) throw new Error(res.message);
         msg.textContent = 'Saved successfully.';

@@ -37,6 +37,7 @@
     createAssignment: (data) => apiRequest('createAssignment', data),
     assignGrade: (data) => apiRequest('assignGrade', data),
     getTeacherDashboardData: (params) => apiRequest('getTeacherDashboardData', params, 'GET'),
+    getClassStudents: (params) => apiRequest('getClassStudents', params, 'GET'),
     getStudentDashboardData: (params) => apiRequest('getStudentDashboardData', params, 'GET'),
     getAssignments: (params) => apiRequest('getAssignments', params, 'GET'),
     getAnnouncements: (params) => apiRequest('getAnnouncements', params, 'GET'),

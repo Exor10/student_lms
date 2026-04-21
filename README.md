@@ -78,7 +78,7 @@ API_BASE_URL: 'https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN
 3. If you redeploy Apps Script later, update `docs/js/config.js` with the new `/exec` URL.
 4. Serve `docs` as static files (VS Code Live Server, Python `http.server`, GitHub Pages, or any static host).
 5. Current dashboard responses are summary-first:
-   - Teacher dashboard: `success`, `summary`, `classes` (detailed arrays may be absent)
+   - Teacher dashboard: `success`, `summary`, `classes`; use `getClassStudents`, `getAssignments`, `getAnnouncements`, and `getCalendarEvents` per class for detailed tables/lists
    - Student dashboard: `success`, `summary` (detailed arrays may be absent)
 
 ## 4) Seed Data

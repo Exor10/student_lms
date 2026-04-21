@@ -29,12 +29,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const summary = dashboard.summary || {};
     const classes = dashboard.classes || [];
-    const students = dashboard.students || [];
-    const assignments = dashboard.assignments || [];
-    const announcements = dashboard.announcements || [];
-    const grades = dashboard.grades || [];
-    const calendar = dashboard.calendar || [];
     defaultClassId = classes[0]?.class_id || '';
+
+    const [studentsRes, assignmentsRes, announcementsRes, calendarRes] = defaultClassId
+      ? await Promise.all([
+        EduApi.getClassStudents({ teacher_user_id: auth.user_id, class_id: defaultClassId }),
+        EduApi.getAssignments({ class_id: defaultClassId }),
+        EduApi.getAnnouncements({ class_id: defaultClassId }),
+        EduApi.getCalendarEvents({ class_id: defaultClassId })
+      ])
+      : [{ success: true }, { success: true }, { success: true }, { success: true }];
+
+    const students = studentsRes.students || studentsRes.data || [];
+    const assignments = assignmentsRes.assignments || assignmentsRes.data || [];
+    const announcements = announcementsRes.announcements || announcementsRes.data || [];
+    const calendar = calendarRes.calendar || calendarRes.data || [];
+    const grades = dashboard.grades || [];
 
     ui.summaryStudents.textContent = summary.total_classes ?? summary.total_students ?? classes.length;
     ui.summaryAssignments.textContent = summary.total_assignments ?? summary.assignments ?? assignments.length;

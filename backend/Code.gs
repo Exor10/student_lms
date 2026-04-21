@@ -37,6 +37,7 @@ function handleRequest_(method, e) {
       createAssignment,
       assignGrade,
       getTeacherDashboardData,
+      getClassStudents,
       getStudentDashboardData,
       getAssignments,
       getAnnouncements,
@@ -56,8 +57,13 @@ function handleRequest_(method, e) {
 
 function parsePayload_(method, e) {
   if (method === 'GET') return e.parameter || {};
+  if (e && e.parameter && Object.keys(e.parameter).length) return e.parameter;
   if (!e.postData || !e.postData.contents) return {};
-  return JSON.parse(e.postData.contents);
+  try {
+    return JSON.parse(e.postData.contents);
+  } catch (err) {
+    return e.parameter || {};
+  }
 }
 
 function jsonResponse_(success, message, data) {
@@ -239,11 +245,11 @@ function loginUser(payload) {
   }
 
   session.token = setSessionToken_(session);
-  return { success: true, message: 'Login successful.', data: session };
+  return { success: true, message: 'Login successful.', user: session };
 }
 
 function addStudent(payload) {
-  const teacher = requireTeacher_(payload.token);
+  const teacher = getTeacherContext_(payload);
   requireFields_(payload, ['full_name', 'email', 'password', 'student_number', 'section', 'year_level', 'class_id']);
 
   const registration = registerStudent(payload);
@@ -272,7 +278,7 @@ function addStudent(payload) {
 }
 
 function createAnnouncement(payload) {
-  const teacher = requireTeacher_(payload.token);
+  const teacher = getTeacherContext_(payload);
   requireFields_(payload, ['class_id', 'title', 'content']);
   appendRow_('Announcements', {
     announcement_id: generateId_('ann'),
@@ -286,7 +292,7 @@ function createAnnouncement(payload) {
 }
 
 function createAssignment(payload) {
-  requireTeacher_(payload.token);
+  getTeacherContext_(payload);
   requireFields_(payload, ['class_id', 'title', 'description', 'due_date', 'status']);
   appendRow_('Assignments', {
     assignment_id: generateId_('asg'),
@@ -309,7 +315,7 @@ function createAssignment(payload) {
 }
 
 function assignGrade(payload) {
-  requireTeacher_(payload.token);
+  getTeacherContext_(payload);
   requireFields_(payload, ['student_id', 'class_id', 'assignment_id', 'score', 'remarks']);
   appendRow_('Grades', {
     grade_id: generateId_('grd'),
@@ -324,45 +330,52 @@ function assignGrade(payload) {
 }
 
 function getTeacherDashboardData(payload) {
-  const teacher = requireTeacher_(payload.token);
+  const teacher = getTeacherContext_(payload);
 
   const classes = getSheetRows_('Classes').filter(c => c.teacher_id === teacher.teacher_id);
   const classIds = classes.map(c => c.class_id);
-  const enrollments = getSheetRows_('Enrollments').filter(e => classIds.includes(e.class_id));
-  const students = getSheetRows_('Students');
-  const users = getSheetRows_('Users');
-
-  const studentRecords = enrollments.map(e => {
-    const std = students.find(s => s.student_id === e.student_id);
-    const usr = std ? users.find(u => u.user_id === std.user_id) : null;
-    return {
-      student_id: std ? std.student_id : '',
-      student_number: std ? std.student_number : '',
-      section: std ? std.section : '',
-      year_level: std ? std.year_level : '',
-      full_name: usr ? usr.full_name : ''
-    };
-  });
-
   const assignments = getSheetRows_('Assignments').filter(a => classIds.includes(a.class_id));
   const announcements = getSheetRows_('Announcements').filter(a => classIds.includes(a.class_id));
-  const grades = getSheetRows_('Grades').filter(g => classIds.includes(g.class_id)).map(g => {
-    const std = students.find(s => s.student_id === g.student_id);
-    const usr = std ? users.find(u => u.user_id === std.user_id) : null;
-    const asg = assignments.find(a => a.assignment_id === g.assignment_id);
-    return {
-      ...g,
-      student_name: usr ? usr.full_name : g.student_id,
-      assignment_title: asg ? asg.title : g.assignment_id
-    };
-  });
-  const calendar = getSheetRows_('CalendarEvents').filter(c => classIds.includes(c.class_id));
+  const grades = getSheetRows_('Grades').filter(g => classIds.includes(g.class_id));
 
   return {
     success: true,
     message: 'Dashboard data loaded.',
-    data: { students: studentRecords, assignments, announcements, grades, calendar }
+    summary: {
+      total_classes: classes.length,
+      total_assignments: assignments.length,
+      total_announcements: announcements.length,
+      total_grades: grades.length
+    },
+    classes
   };
+}
+
+function getClassStudents(payload) {
+  requireFields_(payload, ['teacher_user_id', 'class_id']);
+  const teacher = getTeacherByUserId_(payload.teacher_user_id);
+  const classes = getSheetRows_('Classes');
+  const ownedClass = classes.find(c => c.class_id === payload.class_id && c.teacher_id === teacher.teacher_id);
+  if (!ownedClass) return { success: false, message: 'Class not found or not owned by teacher.' };
+
+  const enrollments = getSheetRows_('Enrollments').filter(e => e.class_id === payload.class_id);
+  const students = getSheetRows_('Students');
+  const users = getSheetRows_('Users');
+
+  const studentMap = enrollments.map(e => {
+    const student = students.find(s => s.student_id === e.student_id);
+    const user = student ? users.find(u => u.user_id === student.user_id) : null;
+    if (!student || !user) return null;
+    return {
+      student_id: student.student_id,
+      full_name: user.full_name,
+      student_number: student.student_number,
+      section: student.section,
+      year_level: student.year_level
+    };
+  }).filter(Boolean);
+
+  return { success: true, message: 'Class students loaded.', students: studentMap };
 }
 
 function getStudentDashboardData(payload) {
@@ -387,15 +400,13 @@ function getStudentDashboardData(payload) {
 }
 
 function getAssignments(payload) {
-  getSessionByToken_(payload.token);
   requireFields_(payload, ['class_id']);
-  return { success: true, message: 'Assignments loaded.', data: getSheetRows_('Assignments').filter(a => a.class_id === payload.class_id) };
+  return { success: true, message: 'Assignments loaded.', assignments: getSheetRows_('Assignments').filter(a => a.class_id === payload.class_id) };
 }
 
 function getAnnouncements(payload) {
-  getSessionByToken_(payload.token);
   requireFields_(payload, ['class_id']);
-  return { success: true, message: 'Announcements loaded.', data: getSheetRows_('Announcements').filter(a => a.class_id === payload.class_id) };
+  return { success: true, message: 'Announcements loaded.', announcements: getSheetRows_('Announcements').filter(a => a.class_id === payload.class_id) };
 }
 
 function getGrades(payload) {
@@ -406,10 +417,9 @@ function getGrades(payload) {
 }
 
 function getCalendarEvents(payload) {
-  getSessionByToken_(payload.token);
   requireFields_(payload, ['class_id']);
   const events = getSheetRows_('CalendarEvents').filter(c => c.class_id === payload.class_id);
-  return { success: true, message: 'Calendar loaded.', data: events };
+  return { success: true, message: 'Calendar loaded.', calendar: events };
 }
 
 function getMessages(payload) {
@@ -443,4 +453,17 @@ function buildUserMessages_(userId) {
     })
     .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))
     .slice(0, 20);
+}
+
+function getTeacherByUserId_(teacherUserId) {
+  const teachers = getSheetRows_('Teachers');
+  const teacher = teachers.find(t => t.user_id === teacherUserId);
+  if (!teacher) throw new Error('Teacher account not found.');
+  return teacher;
+}
+
+function getTeacherContext_(payload) {
+  if (payload.teacher_user_id) return getTeacherByUserId_(payload.teacher_user_id);
+  if (payload.token) return requireTeacher_(payload.token);
+  throw new Error('Missing teacher_user_id.');
 }

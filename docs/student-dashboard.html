@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduLMS | Student Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">EduLMS Student</div>
+      <a class="nav-link active" href="#">Dashboard</a>
+      <a class="nav-link" href="#assignments">Assignments</a>
+      <a class="nav-link" href="#announcements">Announcements</a>
+      <a class="nav-link" href="#grades">Grades</a>
+      <a class="nav-link" href="#calendar">Calendar</a>
+      <a class="nav-link" href="#messages">Messages</a>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <strong>Hello, <span id="studentName"></span></strong>
+        <div style="display:flex; gap:8px;">
+          <button id="themeToggle" class="secondary" type="button">Dark Mode</button>
+          <button id="logoutBtn" class="secondary" type="button">Logout</button>
+        </div>
+      </div>
+
+      <section class="grid-cards">
+        <article class="card"><div class="card-head">Assignments</div><div class="card-body"><h2 id="summaryAssignments">0</h2></div></article>
+        <article class="card"><div class="card-head">Announcements</div><div class="card-body"><h2 id="summaryAnnouncements">0</h2></div></article>
+        <article class="card"><div class="card-head">Grades</div><div class="card-body"><h2 id="summaryGrades">0</h2></div></article>
+      </section>
+
+      <section class="layout-two-col" id="assignments">
+        <article class="card">
+          <div class="card-head">Upcoming Assignments</div>
+          <div class="card-body table-wrap">
+            <table><thead><tr><th>Title</th><th>Description</th><th>Due Date</th><th>Status</th></tr></thead><tbody id="assignmentsBody"></tbody></table>
+          </div>
+        </article>
+        <article class="card" id="announcements">
+          <div class="card-head">Announcement Feed</div>
+          <div class="card-body" id="announcementsList"></div>
+        </article>
+      </section>
+
+      <section class="layout-two-col" style="margin-top:16px;" id="grades">
+        <article class="card">
+          <div class="card-head">Grades</div>
+          <div class="card-body table-wrap">
+            <table><thead><tr><th>Assignment</th><th>Score</th><th>Remarks</th><th>Date</th></tr></thead><tbody id="gradesBody"></tbody></table>
+          </div>
+        </article>
+        <article class="card" id="calendar">
+          <div class="card-head">Calendar</div>
+          <div class="card-body"><ul id="calendarList"></ul></div>
+        </article>
+      </section>
+
+      <section class="layout-two-col" id="messages" style="margin-top:16px;">
+        <article class="card">
+          <div class="card-head">Message Teacher</div>
+          <div class="card-body">
+            <form id="messageForm">
+              <label>Teacher User ID</label><input name="receiver_user_id" required>
+              <label>Message</label><textarea name="message_body" required></textarea>
+              <button type="submit" style="margin-top:12px;">Send</button>
+              <div class="message hidden"></div>
+            </form>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-head">Recent Messages</div>
+          <div class="card-body"><ul id="messageHistory"></ul></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/student-dashboard.js"></script>
+</body>
+</html>

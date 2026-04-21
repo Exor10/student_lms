@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduLMS | Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="container-auth">
+    <section class="auth-card">
+      <h1>Create EduLMS Account</h1>
+      <p class="subtitle">Choose a role and complete your details.</p>
+      <form id="registerForm">
+        <label for="role">Role</label>
+        <select id="role" name="role" required>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+        </select>
+
+        <label for="full_name">Full Name</label>
+        <input id="full_name" name="full_name" required />
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" minlength="8" required />
+
+        <div id="teacherFields" class="hidden">
+          <label for="department">Department</label>
+          <input id="department" name="department" />
+        </div>
+
+        <div id="studentFields">
+          <label for="student_number">Student Number</label>
+          <input id="student_number" name="student_number" />
+
+          <label for="section">Section</label>
+          <input id="section" name="section" />
+
+          <label for="year_level">Year Level</label>
+          <input id="year_level" name="year_level" />
+        </div>
+
+        <button type="submit" style="margin-top:16px;">Register</button>
+        <div id="message" class="message hidden"></div>
+      </form>
+      <p class="auth-footer">Already registered? <a href="index.html">Login here</a></p>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

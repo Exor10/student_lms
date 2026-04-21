@@ -1,6 +1,7 @@
 (function () {
   async function apiRequest(action, payload = {}, method = 'POST') {
     const base = window.EDULMS_CONFIG.API_BASE_URL;
+
     if (!base || base.includes('PASTE_YOUR')) {
       throw new Error('Set API_BASE_URL in docs/js/config.js');
     }
@@ -11,11 +12,16 @@
       return res.json();
     }
 
+    const body = new URLSearchParams({ action, ...payload }).toString();
+
     const res = await fetch(base, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, ...payload })
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body
     });
+
     return res.json();
   }
 

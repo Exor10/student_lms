@@ -11,12 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const result = await EduApi.loginUser({ email, password });
-      if (!result.success) throw new Error(result.message || 'Login failed');
 
-      EduAuth.setSession(result.data);
-      window.location.href = result.data.role === 'teacher' ? 'teacher-dashboard.html' : 'student-dashboard.html';
+      if (!result.success) {
+        throw new Error(result.message || 'Login failed');
+      }
+
+      EduAuth.setSession(result.user);
+      window.location.href =
+        result.user.role === 'teacher'
+          ? 'teacher-dashboard.html'
+          : 'student-dashboard.html';
     } catch (err) {
-      message.textContent = err.message;
+      message.textContent = err.message || 'Login failed';
       message.className = 'message error';
     }
   });

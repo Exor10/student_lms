@@ -69,15 +69,15 @@ Paste these headers in row 1 of each sheet:
 ## 3) Connect Frontend to Backend
 
 1. Open `docs/js/config.js`.
-2. Replace:
+2. `API_BASE_URL` is already pointed to your provided Apps Script Web App URL:
 
 ```js
-API_BASE_URL: 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'
+API_BASE_URL: 'https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN7vUg9_dGpGqOBm6yP2_50agQWyQNjlel6fPo8ntTc/exec'
 ```
 
-with your deployed web app URL.
+3. If you redeploy Apps Script later, update `docs/js/config.js` with the new URL.
 
-3. Serve `docs` as static files (VS Code Live Server, Python `http.server`, or any static host).
+4. Serve `docs` as static files (VS Code Live Server, Python `http.server`, or any static host).
 
 ## 4) Seed Data
 

@@ -3,7 +3,11 @@
 Base URL:
 
 ```text
-https://script.google.com/macros/s/DEPLOYMENT_ID/exec
+https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN7vUg9_dGpGqOBm6yP2_50agQWyQNjlel6fPo8ntTc/exec
+```
+
+```bash
+API_URL="https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN7vUg9_dGpGqOBm6yP2_50agQWyQNjlel6fPo8ntTc/exec"
 ```
 
 ## Login

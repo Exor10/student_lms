@@ -1,3 +1,3 @@
 window.EDULMS_CONFIG = {
-  API_BASE_URL: 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'
+  API_BASE_URL: 'https://script.google.com/macros/s/AKfycbwT_0ghAP7d9MkgTTHtZtbnYN7vUg9_dGpGqOBm6yP2_50agQWyQNjlel6fPo8ntTc/exec'
 };

@@ -1,4 +1,4 @@
-const SPREADSHEET_ID = 'PASTE_SPREADSHEET_ID_HERE';
+const SPREADSHEET_ID = '1uY6XbOMebkDK-G26TKV4-qAgDqv0yfg16h2EuttlX6U';
 const SHEETS = {
   USERS: 'Users',
   STUDENTS: 'Students',

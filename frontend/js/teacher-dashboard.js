@@ -1,4 +1,5 @@
 const teacherSession = getSessionOrRedirect('teacher');
+
 if (teacherSession) {
   bindDashboardShell();
   document.getElementById('teacher-name').textContent = teacherSession.full_name;
@@ -12,24 +13,56 @@ async function initializeTeacherDashboard(session) {
 
 async function loadTeacherDashboardData(session) {
   try {
-    const dashboard = await apiRequest('getTeacherDashboardData', { user_id: session.user_id }, 'GET');
-    const { students, assignments, announcements, grades, calendar_events } = dashboard.data;
+    const dashboard = await apiRequest(
+      'getTeacherDashboardData',
+      { teacher_user_id: session.user_id },
+      'GET'
+    );
+
+    if (!dashboard.success) {
+      throw new Error(dashboard.message || 'Failed to load dashboard.');
+    }
+
+    const summary = dashboard.summary || {};
+    const classes = dashboard.classes || [];
 
     renderSummaryCards('teacher-summary-cards', [
-      { label: 'Students', value: students.length },
-      { label: 'Assignments', value: assignments.length },
-      { label: 'Announcements', value: announcements.length },
-      { label: 'Grades Submitted', value: grades.length }
+      { label: 'Classes', value: summary.total_classes || 0 },
+      { label: 'Assignments', value: summary.total_assignments || 0 },
+      { label: 'Announcements', value: summary.total_announcements || 0 },
+      { label: 'Grades Submitted', value: summary.total_grades || 0 }
     ]);
 
-    document.getElementById('student-table-body').innerHTML = students.length
-      ? students.map((s) => `<tr><td>${s.full_name}</td><td>${s.student_number}</td><td>${s.section}</td><td>${s.year_level}</td></tr>`).join('')
-      : '<tr><td colspan="4">No students found.</td></tr>';
+    document.getElementById('student-table-body').innerHTML =
+      '<tr><td colspan="4">Student list is not returned by the current Apps Script dashboard endpoint yet.</td></tr>';
 
-    renderStackList('assignment-list', assignments, (a) => `<li><strong>${a.title}</strong><br>${a.description}<br>Due: ${a.due_date} | ${a.status}</li>`);
-    renderStackList('announcement-list', announcements, (a) => `<li><strong>${a.title}</strong><br>${a.content}<br>Posted: ${a.date_posted}</li>`);
-    renderStackList('grade-list', grades, (g) => `<li>Student ${g.student_id} | Assignment ${g.assignment_id} | Score: ${g.score} (${g.remarks})</li>`);
-    renderStackList('calendar-list', calendar_events, (c) => `<li><strong>${c.title}</strong><br>${c.event_date} (${c.event_type})</li>`);
+    renderStackList(
+      'assignment-list',
+      [],
+      (a) => `<li><strong>${a.title}</strong><br>${a.description}<br>Due: ${a.due_date} | ${a.status}</li>`,
+      'Assignments are not returned by the current dashboard endpoint yet.'
+    );
+
+    renderStackList(
+      'announcement-list',
+      [],
+      (a) => `<li><strong>${a.title}</strong><br>${a.content}<br>Posted: ${a.date_posted}</li>`,
+      'Announcements are not returned by the current dashboard endpoint yet.'
+    );
+
+    renderStackList(
+      'grade-list',
+      [],
+      (g) => `<li>Student ${g.student_id} | Assignment ${g.assignment_id} | Score: ${g.score} (${g.remarks})</li>`,
+      'Grades are not returned by the current dashboard endpoint yet.'
+    );
+
+    renderStackList(
+      'calendar-list',
+      classes,
+      (c) => `<li><strong>${c.class_name || 'Untitled Class'}</strong><br>Class ID: ${c.class_id}</li>`,
+      'No classes found.'
+    );
   } catch (error) {
     setMessage('add-student-message', error.message, true);
   }
@@ -45,11 +78,17 @@ function bindTeacherForms(session) {
 function bindForm(formId, action, messageId, session) {
   document.getElementById(formId)?.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-    payload.user_id = session.user_id;
+    payload.teacher_user_id = session.user_id;
 
     try {
-      await apiRequest(action, payload);
+      const result = await apiRequest(action, payload);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Request failed.');
+      }
+
       setMessage(messageId, 'Saved successfully.');
       event.currentTarget.reset();
       await loadTeacherDashboardData(session);

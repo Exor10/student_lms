@@ -1,4 +1,5 @@
 const studentSession = getSessionOrRedirect('student');
+
 if (studentSession) {
   bindDashboardShell();
   document.getElementById('student-name').textContent = studentSession.full_name;
@@ -12,24 +13,55 @@ async function initializeStudentDashboard(session) {
 
 async function loadStudentDashboardData(session) {
   try {
-    const dashboard = await apiRequest('getStudentDashboardData', { user_id: session.user_id }, 'GET');
-    const { assignments, announcements, grades, calendar_events, messages } = dashboard.data;
+    const dashboard = await apiRequest(
+      'getStudentDashboardData',
+      { student_user_id: session.user_id },
+      'GET'
+    );
+
+    if (!dashboard.success) {
+      throw new Error(dashboard.message || 'Failed to load dashboard.');
+    }
+
+    const summary = dashboard.summary || {};
 
     renderSummaryCards('student-summary-cards', [
-      { label: 'Open Assignments', value: assignments.length },
-      { label: 'Announcements', value: announcements.length },
-      { label: 'Grade Entries', value: grades.length },
-      { label: 'Calendar Events', value: calendar_events.length }
+      { label: 'Classes', value: summary.total_classes || 0 },
+      { label: 'Assignments', value: summary.total_assignments || 0 },
+      { label: 'Announcements', value: summary.total_announcements || 0 },
+      { label: 'Grade Entries', value: summary.total_grades || 0 }
     ]);
 
-    renderStackList('student-assignment-list', assignments, (a) => `<li><strong>${a.title}</strong><br>${a.description}<br>Due: ${a.due_date}</li>`);
-    renderStackList('student-announcement-list', announcements, (a) => `<li><strong>${a.title}</strong><br>${a.content}<br>${a.date_posted}</li>`);
-    renderStackList('student-calendar-list', calendar_events, (c) => `<li><strong>${c.title}</strong><br>${c.event_date} (${c.event_type})</li>`);
-    renderStackList('message-list', messages || [], (m) => `<li>${m.sent_at}: ${m.message_body}</li>`);
+    renderStackList(
+      'student-assignment-list',
+      [],
+      (a) => `<li><strong>${a.title}</strong><br>${a.description}<br>Due: ${a.due_date}</li>`,
+      'Assignments are not returned by the current dashboard endpoint yet.'
+    );
 
-    document.getElementById('student-grade-table').innerHTML = grades.length
-      ? grades.map((g) => `<tr><td>${g.assignment_id}</td><td>${g.score}</td><td>${g.remarks}</td><td>${g.date_recorded}</td></tr>`).join('')
-      : '<tr><td colspan="4">No grades yet.</td></tr>';
+    renderStackList(
+      'student-announcement-list',
+      [],
+      (a) => `<li><strong>${a.title}</strong><br>${a.content}<br>${a.date_posted}</li>`,
+      'Announcements are not returned by the current dashboard endpoint yet.'
+    );
+
+    renderStackList(
+      'student-calendar-list',
+      [],
+      (c) => `<li><strong>${c.title}</strong><br>${c.event_date} (${c.event_type})</li>`,
+      'Calendar events are not returned by the current dashboard endpoint yet.'
+    );
+
+    renderStackList(
+      'message-list',
+      [],
+      (m) => `<li>${m.sent_at}: ${m.message_body}</li>`,
+      'Messages are not returned by the current dashboard endpoint yet.'
+    );
+
+    document.getElementById('student-grade-table').innerHTML =
+      '<tr><td colspan="4">Grades are not returned by the current dashboard endpoint yet.</td></tr>';
   } catch (error) {
     setMessage('message-status', error.message, true);
   }
@@ -38,11 +70,17 @@ async function loadStudentDashboardData(session) {
 function bindMessageForm(session) {
   document.getElementById('message-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
     payload.sender_user_id = session.user_id;
 
     try {
-      await apiRequest('sendMessage', payload);
+      const result = await apiRequest('sendMessage', payload);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to send message.');
+      }
+
       setMessage('message-status', 'Message sent.');
       event.currentTarget.reset();
       await loadStudentDashboardData(session);

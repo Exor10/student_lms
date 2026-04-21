@@ -1,166 +1,117 @@
-# EduLMS (Google Sheets + Google Apps Script)
+# EduLMS Prototype (Google Sheets + Apps Script)
 
-EduLMS is a complete LMS web application prototype with separate teacher and student authentication, role-based dashboards, and Google Sheets-backed data via Google Apps Script.
+EduLMS is a student project LMS prototype with separate teacher and student authentication, role-based dashboards, and Google Sheets as the database through a Google Apps Script web app API.
 
 ## Project Structure
 
-```
+```text
 student_lms/
-├── backend/
-│   └── Code.gs
-├── frontend/
+├── docs/
 │   ├── index.html
+│   ├── register.html
+│   ├── teacher-dashboard.html
+│   ├── student-dashboard.html
 │   ├── css/
 │   │   └── styles.css
-│   ├── js/
-│   │   ├── api.js
-│   │   ├── auth.js
-│   │   ├── config.js
-│   │   ├── dashboard-common.js
-│   │   ├── register.js
-│   │   ├── student-dashboard.js
-│   │   └── teacher-dashboard.js
-│   └── pages/
-│       ├── register.html
-│       ├── student-dashboard.html
-│       └── teacher-dashboard.html
-└── scripts/
-    └── seed-data.csv.md
+│   └── js/
+│       ├── config.js
+│       ├── api.js
+│       ├── auth.js
+│       ├── login.js
+│       ├── register.js
+│       ├── teacher-dashboard.js
+│       └── student-dashboard.js
+└── backend/
+    ├── Code.gs
+    ├── seed_data.csv
+    └── APIS.md
 ```
 
-## Features
+## 1) Google Sheets Setup
 
-### Authentication
-- Register as teacher or student.
-- Login using email + password.
-- Passwords are SHA-256 hashed before storage.
-- Session state is kept in `sessionStorage` (non-persistent browser session only).
+Create one spreadsheet and add these sheets exactly:
 
-### Teacher Dashboard
-- Summary cards.
-- Student master list table.
-- Add student form.
-- Create/manage assignments.
-- Post announcements.
-- Assign grades.
-- Calendar overview.
+- Users
+- Students
+- Teachers
+- Classes
+- Enrollments
+- Assignments
+- Announcements
+- Grades
+- CalendarEvents
+- Messages
 
-### Student Dashboard
-- Summary cards.
-- Upcoming assignments.
-- Announcement feed.
-- Grades table.
-- Calendar panel.
-- Message teacher panel.
+Paste these headers in row 1 of each sheet:
 
-## Google Sheets Database Design
+- **Users**: `user_id, full_name, email, password_hash, role, status, created_at`
+- **Students**: `student_id, user_id, student_number, section, year_level`
+- **Teachers**: `teacher_id, user_id, department`
+- **Classes**: `class_id, teacher_id, class_name, school_year, section`
+- **Enrollments**: `enrollment_id, class_id, student_id`
+- **Assignments**: `assignment_id, class_id, title, description, due_date, status`
+- **Announcements**: `announcement_id, class_id, teacher_id, title, content, date_posted`
+- **Grades**: `grade_id, student_id, class_id, assignment_id, score, remarks, date_recorded`
+- **CalendarEvents**: `event_id, class_id, title, event_date, event_type`
+- **Messages**: `message_id, sender_user_id, receiver_user_id, message_body, sent_at`
 
-Create one spreadsheet with the following sheet names and exact header rows in row 1:
+## 2) Apps Script Backend Setup
 
-1. `Users`
-   - `user_id,full_name,email,password_hash,role,status,created_at`
-2. `Students`
-   - `student_id,user_id,student_number,section,year_level`
-3. `Teachers`
-   - `teacher_id,user_id,department`
-4. `Classes`
-   - `class_id,teacher_id,class_name,school_year,section`
-5. `Enrollments`
-   - `enrollment_id,class_id,student_id`
-6. `Assignments`
-   - `assignment_id,class_id,title,description,due_date,status`
-7. `Announcements`
-   - `announcement_id,class_id,teacher_id,title,content,date_posted`
-8. `Grades`
-   - `grade_id,student_id,class_id,assignment_id,score,remarks,date_recorded`
-9. `CalendarEvents`
-   - `event_id,class_id,title,event_date,event_type`
-10. `Messages`
-    - `message_id,sender_user_id,receiver_user_id,message_body,sent_at`
-
-## Backend Setup (Google Apps Script)
-
-1. Open [script.google.com](https://script.google.com).
-2. Create a new Apps Script project.
-3. Copy the content of `backend/Code.gs` into your script project.
-4. Update `SPREADSHEET_ID` at the top of `Code.gs`.
-5. Deploy:
-   - **Deploy > New deployment**
-   - Type: **Web app**
+1. Open [script.google.com](https://script.google.com) and create a project.
+2. Copy `backend/Code.gs` into the default script file.
+3. Set `SPREADSHEET_ID` in `Code.gs` to your spreadsheet ID.
+4. Save project.
+5. Deploy as **Web app**:
    - Execute as: **Me**
-   - Who has access: **Anyone with the link** (or your preferred restricted mode if frontend is secured)
-6. Copy the deployed Web App URL.
+   - Who has access: **Anyone with Google account** (or stricter depending on testing)
+6. Copy the deployed web app URL.
 
-## Frontend Setup
+## 3) Connect Frontend to Backend
 
-1. Open `frontend/js/config.js`.
-2. Replace `PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE` with your deployed Apps Script URL.
-3. Host `frontend/` using any static host:
-   - VS Code Live Server
-   - GitHub Pages
-   - Netlify
-   - Cloudflare Pages
+1. Open `docs/js/config.js`.
+2. Replace:
 
-## Example API Usage
-
-### Register Teacher
-
-```bash
-curl -X POST "YOUR_WEB_APP_URL" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action":"registerTeacher",
-    "full_name":"Marian Dela Cruz",
-    "email":"marian.teacher@school.edu",
-    "password":"TeachPass123!",
-    "department":"Mathematics"
-  }'
+```js
+API_BASE_URL: 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'
 ```
 
-### Register Student
+with your deployed web app URL.
 
-```bash
-curl -X POST "YOUR_WEB_APP_URL" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action":"registerStudent",
-    "full_name":"Liam Ramos",
-    "email":"liam.student@school.edu",
-    "password":"StudPass123!",
-    "student_number":"2026-0012",
-    "section":"STEM-11A",
-    "year_level":"11"
-  }'
-```
+3. Serve `docs` as static files (VS Code Live Server, Python `http.server`, or any static host).
 
-### Login
+## 4) Seed Data
 
-```bash
-curl -X POST "YOUR_WEB_APP_URL" \
-  -H "Content-Type: application/json" \
-  -d '{"action":"loginUser","email":"liam.student@school.edu","password":"StudPass123!"}'
-```
+Use `backend/seed_data.csv` to copy sample rows into each sheet after headers.
 
-### Teacher Dashboard Data
+## 5) Security Notes
 
-```bash
-curl "YOUR_WEB_APP_URL?action=getTeacherDashboardData&user_id=USR-EXAMPLE"
-```
+- Passwords are hashed (SHA-256) before saving.
+- No direct Google Sheet public access is used by frontend.
+- Role checks are enforced for teacher-only actions.
+- Required fields are validated on backend before writes.
+- Frontend stores only session token in `sessionStorage` (not persistent database data).
 
-### Student Dashboard Data
+## 6) Feature Coverage
 
-```bash
-curl "YOUR_WEB_APP_URL?action=getStudentDashboardData&user_id=USR-EXAMPLE"
-```
+### Teacher
+- Register / login
+- Dashboard summary cards
+- Student master list
+- Add students
+- Create assignments
+- Post announcements
+- Assign grades
+- Calendar overview
 
-## Notes on Security
+### Student
+- Register / login
+- Dashboard summary cards
+- View assignments
+- View announcements
+- View grades
+- View calendar events
+- Message teacher (optional feature included)
 
-- Do not make your spreadsheet public.
-- Keep all data access in Apps Script only.
-- Only hashed passwords are stored (`password_hash` column).
-- Teacher-only actions (`addStudent`, `createAssignment`, `createAnnouncement`, `assignGrade`) enforce role checks server-side.
-- Required fields are validated before writes.
+## 7) API examples
 
-## Seed Data
-
-Use the sample records in `scripts/seed-data.csv.md` to populate initial rows.
+See `backend/APIS.md` for request/response examples.

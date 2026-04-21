@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduLMS | Teacher Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <div class="dashboard-shell">
+      <aside class="sidebar">
+        <h1 class="brand-title">EduLMS</h1>
+        <nav class="nav-list">
+          <button class="nav-item active" data-section="overview">Overview</button>
+          <button class="nav-item" data-section="students">Student Management</button>
+          <button class="nav-item" data-section="assignments">Assignments</button>
+          <button class="nav-item" data-section="announcements">Announcements</button>
+          <button class="nav-item" data-section="grades">Grades</button>
+          <button class="nav-item" data-section="calendar">Calendar</button>
+        </nav>
+        <button id="toggle-theme" class="btn btn-secondary">Toggle Theme</button>
+      </aside>
+
+      <div class="main-content">
+        <header class="top-header">
+          <h2 id="dashboard-title">Teacher Dashboard</h2>
+          <div>
+            <span id="teacher-name"></span>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+          </div>
+        </header>
+
+        <section id="overview" class="panel-section active">
+          <div class="cards-grid" id="teacher-summary-cards"></div>
+        </section>
+
+        <section id="students" class="panel-section">
+          <article class="card">
+            <h3>Student Master List</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Student #</th><th>Section</th><th>Year</th></tr>
+                </thead>
+                <tbody id="student-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Add Student</h3>
+            <form id="add-student-form" class="grid-form">
+              <input type="text" name="full_name" placeholder="Full Name" required />
+              <input type="email" name="email" placeholder="Email" required />
+              <input type="text" name="student_number" placeholder="Student Number" required />
+              <input type="text" name="section" placeholder="Section" required />
+              <input type="text" name="year_level" placeholder="Year Level" required />
+              <button type="submit" class="btn btn-primary">Add Student</button>
+            </form>
+            <p id="add-student-message" class="form-message"></p>
+          </article>
+        </section>
+
+        <section id="assignments" class="panel-section">
+          <article class="card">
+            <h3>Create Assignment</h3>
+            <form id="create-assignment-form" class="grid-form">
+              <input type="text" name="class_id" placeholder="Class ID" required />
+              <input type="text" name="title" placeholder="Assignment Title" required />
+              <input type="text" name="description" placeholder="Description" required />
+              <input type="date" name="due_date" required />
+              <select name="status" required>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <button type="submit" class="btn btn-primary">Create Assignment</button>
+            </form>
+            <p id="assignment-message" class="form-message"></p>
+          </article>
+          <article class="card">
+            <h3>Assignments</h3>
+            <ul id="assignment-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="announcements" class="panel-section">
+          <article class="card">
+            <h3>Post Announcement</h3>
+            <form id="announcement-form" class="grid-form">
+              <input type="text" name="class_id" placeholder="Class ID" required />
+              <input type="text" name="title" placeholder="Announcement Title" required />
+              <textarea name="content" placeholder="Announcement Content" required></textarea>
+              <button type="submit" class="btn btn-primary">Post Announcement</button>
+            </form>
+            <p id="announcement-message" class="form-message"></p>
+          </article>
+          <article class="card">
+            <h3>Recent Announcements</h3>
+            <ul id="announcement-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="grades" class="panel-section">
+          <article class="card">
+            <h3>Assign Grade</h3>
+            <form id="grade-form" class="grid-form">
+              <input type="text" name="student_id" placeholder="Student ID" required />
+              <input type="text" name="class_id" placeholder="Class ID" required />
+              <input type="text" name="assignment_id" placeholder="Assignment ID" required />
+              <input type="number" name="score" placeholder="Score" min="0" max="100" required />
+              <input type="text" name="remarks" placeholder="Remarks" required />
+              <button type="submit" class="btn btn-primary">Save Grade</button>
+            </form>
+            <p id="grade-message" class="form-message"></p>
+          </article>
+          <article class="card">
+            <h3>Grade Records</h3>
+            <ul id="grade-list" class="stack-list"></ul>
+          </article>
+        </section>
+
+        <section id="calendar" class="panel-section">
+          <article class="card">
+            <h3>Calendar Overview</h3>
+            <ul id="calendar-list" class="stack-list"></ul>
+          </article>
+        </section>
+      </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/dashboard-common.js"></script>
+    <script src="../js/teacher-dashboard.js"></script>
+  </body>
+</html>

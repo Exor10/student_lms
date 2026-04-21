@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduLMS | Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body class="auth-page">
+    <main class="auth-container">
+      <section class="auth-card">
+        <h1 class="brand-title">EduLMS</h1>
+        <p class="auth-subtitle">Create a teacher or student account.</p>
+
+        <form id="register-form" class="auth-form">
+          <label>
+            Full Name
+            <input type="text" id="full_name" name="full_name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" id="email" name="email" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="password" name="password" minlength="8" required />
+          </label>
+          <label>
+            Register As
+            <select id="role" name="role" required>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+            </select>
+          </label>
+
+          <div id="student-fields" class="role-fields">
+            <label>
+              Student Number
+              <input type="text" id="student_number" name="student_number" />
+            </label>
+            <label>
+              Section
+              <input type="text" id="section" name="section" />
+            </label>
+            <label>
+              Year Level
+              <input type="text" id="year_level" name="year_level" />
+            </label>
+          </div>
+
+          <div id="teacher-fields" class="role-fields hidden">
+            <label>
+              Department
+              <input type="text" id="department" name="department" />
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+
+        <p id="register-message" class="form-message" aria-live="polite"></p>
+        <p class="auth-link-row">Already registered? <a href="../index.html">Back to login</a>.</p>
+      </section>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/register.js"></script>
+  </body>
+</html>
